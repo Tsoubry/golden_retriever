@@ -1,0 +1,21 @@
+[package]
+name = "golden_retriever"
+version = "0.1.0"
+authors = ["tanguy <tanguy.soubry@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+lambda_runtime = "0.2.1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1.0.60"
+log = "0.4.11"
+simple_logger = "1.11.0"
+simple-error = "0.2.2"
+uuid = { version = "0.8.1", features = ["serde", "v4"] }
+rusoto_core = { version = "0.45.0", default_features = false, features=["rustls"] }
+rusoto_dynamodb = { version = "0.45.0", default_features = false, features=["rustls", "serialize_structs", "deserialize_structs"] }
+serde_dynamodb = { version = "0.6.0", default_features = false, features=["rustls"] }
+futures = "0.3.8"
+tokio = { version = "0.2", features = ["macros"] }
