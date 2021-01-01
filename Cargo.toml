@@ -14,9 +14,8 @@ log = "0.4.11"
 simple_logger = "1.11.0"
 simple-error = "0.2.2"
 uuid = { version = "0.8.1", features = ["serde", "v4"] }
-rusoto_core = { version = "0.45.0" }
 futures = "0.3.8"
-tokio = { version = "0.3", features = ["full"] }
+tokio = { version = "0.3", features = ["rt-multi-thread", "macros", "sync"] }
 tokio-postgres = "0.5.4"
 deadpool-postgres = "0.5.2"
 tokio-pg-mapper = "0.1.8"

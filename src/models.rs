@@ -1,9 +1,9 @@
 use serde::{Deserialize, Serialize};
-use tokio_pg_mapper_derive::PostgresMapper;
+//use tokio_pg_mapper_derive::PostgresMapper;
 
 
-#[derive(Deserialize, PostgresMapper, Serialize)]
-#[pg_mapper(table = "article")]
+#[derive(Deserialize, Serialize)]
+//#[pg_mapper(table = "article")]
 pub struct Article {
     pub platform: String,
     pub section: String,
