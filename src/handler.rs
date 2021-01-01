@@ -1,10 +1,11 @@
-use lambda_runtime::{error::HandlerError, Context};
+use netlify_lambda::{Context};
 use serde::{Deserialize, Serialize};
 use simple_error::bail;
 use log::{error, info};
 use uuid::Uuid;
+use crate::error::Error;
 
-use crate::dynamo::{get_client, get_item_list, add_itemlist, form_itemlist_key, ItemList};
+use crate::db::{get_client, get_item_list, add_itemlist, form_itemlist_key, ItemList};
 
 
 #[derive(Deserialize)]
@@ -21,11 +22,11 @@ pub struct CustomOutput {
 }
 
 
-pub fn default_handler(e: CustomEvent, c: Context) -> Result<CustomOutput, HandlerError> {
+pub async fn default_handler(e: CustomEvent, c: Context) -> Result<CustomOutput, Error> {
     if e.target_service == "" || e.section == "" {
         error!(
             "Empty strings in one or more fields of the payload for request {}",
-            c.aws_request_id
+            c.request_id
         );
         bail!("Empty fields");
     }
@@ -36,12 +37,12 @@ pub fn default_handler(e: CustomEvent, c: Context) -> Result<CustomOutput, Handl
     let key = form_itemlist_key(e.target_service, e.section);
 
     info!("getting current list based on key: {}", &key);
-    let current_list = get_item_list(&dynamo_client, key.clone());
+    let current_list = get_item_list(&dynamo_client, key.clone()).await;
     info!("current list acquired");
 
     match current_list {
         Ok(mut list) => {
-            let mut new_items: Vec<Uuid> = vec![Uuid::new_v4()];
+            let mut new_items: Vec<String> = vec![Uuid::new_v4().to_string()];
             list.merge_lists(&mut new_items);
             add_itemlist(&dynamo_client, list).unwrap();
         },
