@@ -1,15 +1,14 @@
-use serde::{Deserialize, Serialize};
-//use tokio_pg_mapper_derive::PostgresMapper;
+use tokio_pg_mapper_derive::PostgresMapper;
 
-
-#[derive(Deserialize, Serialize)]
-//#[pg_mapper(table = "article")]
+#[derive(PostgresMapper)]
+#[pg_mapper(table = "article")]
 pub struct Article {
-    pub platform: String,
-    pub section: String,
+    pub id: i64,
     pub article_id: String,
     pub article_title: String,
+    pub platform: String,
+    pub section: String,
     pub image_url: Option<String>,
-    pub article_url: String,
-    pub updated: i32
+    pub article_url: Option<String>,
+    pub updated: std::time::SystemTime,
 }

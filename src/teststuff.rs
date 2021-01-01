@@ -1,4 +1,5 @@
 mod db;
+mod models;
 
 use tokio_postgres::{Error};
 

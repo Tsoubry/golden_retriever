@@ -4,8 +4,9 @@ use simple_error::bail;
 use log::{error, info};
 use uuid::Uuid;
 use crate::error::Error;
-use crate::db::get_client_pool;
-
+use crate::db::{get_client_pool, add_article};
+use std::time::SystemTime;
+use crate::models::Article;
 
 #[derive(Deserialize)]
 pub struct CustomEvent {
@@ -30,39 +31,24 @@ pub async fn default_handler(e: CustomEvent, c: Context) -> Result<CustomOutput,
         bail!("Empty fields");
     }
 
-    info!("service: {}, section: {}", &e.target_service, &e.section);
+    info!("getting current list for target: {}, section: {}", &e.target_service, &e.section);
 
-    //let key = form_itemlist_key(e.target_service, e.section);
+    let pool = get_client_pool();
 
-    // info!("getting current list based on key: {}", &key);
-    // let current_list = get_item_list(&dynamo_client, key.clone()).await;
-    // info!("current list acquired");
-    //
-    // match current_list {
-    //     Ok(mut list) => {
-    //         let mut new_items: Vec<String> = vec![Uuid::new_v4().to_string()];
-    //         list.merge_lists(&mut new_items);
-    //         add_itemlist(&dynamo_client, list).unwrap();
-    //     },
-    //     Err(_) => {
-    //         log::info!("Key {} doesn't exist yet. Creating it", &key);
-    //         add_itemlist(&dynamo_client, ItemList::new(key)).unwrap();
-    //     }
-    // }
+    let fake_article = Article {
+        id: 1,
+        article_id: uuid::Uuid::new_v4().to_string(),
+        article_title: "another article".to_string(),
+        platform: e.target_service,
+        section: e.section,
+        image_url: Some("".to_string()),
+        article_url: Some("google.com".to_string()),
+        updated: SystemTime::now(),
+    };
 
-    info!("get client");
-    let mut client = get_client_pool().get().await.unwrap();
-
-
-    info!("start query");
-    let stmt = client.prepare("SELECT article_title FROM article").await.unwrap();
-
-    let result = client.query_one(&stmt, &[]).await.unwrap();
-    let title: String = result.get(0);
-
-    info!("Article title is: {}", &title);
+    let result = add_article(&pool, fake_article).await.unwrap();
 
     Ok(CustomOutput {
-        message: title,
+        message: format!("result: {}", result),
     })
 }
