@@ -4,6 +4,15 @@ version = "0.1.0"
 authors = ["tanguy <tanguy.soubry@gmail.com>"]
 edition = "2018"
 
+[[bin]]
+name = "golden_retriever"
+path = "src/main.rs"
+
+
+[[bin]]
+name = "teststuff"
+path = "src/teststuff.rs"
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
@@ -22,3 +31,4 @@ tokio-pg-mapper = "0.1.8"
 tokio-pg-mapper-derive = "0.1.5"
 dotenv = "0.15.0"
 config = "0.10.1"
+tokio-compat-02 = "0.1.2"

@@ -13,16 +13,18 @@ use simple_logger::SimpleLogger;
 
 use handler::default_handler;
 
+use tokio_compat_02::FutureExt;
+
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
     SimpleLogger::new()
-        .with_level(LevelFilter::Info)
+        .with_level(LevelFilter::Debug)
         .init()
         .unwrap();
 
     let func = handler_fn(default_handler);
-    run(func).await.unwrap();
+    run(func).compat().await.unwrap();
 
     Ok(())
 }

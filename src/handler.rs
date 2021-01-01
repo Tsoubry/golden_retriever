@@ -30,6 +30,8 @@ pub async fn default_handler(e: CustomEvent, c: Context) -> Result<CustomOutput,
         bail!("Empty fields");
     }
 
+    info!("service: {}, section: {}", &e.target_service, &e.section);
+
     //let key = form_itemlist_key(e.target_service, e.section);
 
     // info!("getting current list based on key: {}", &key);
@@ -48,8 +50,11 @@ pub async fn default_handler(e: CustomEvent, c: Context) -> Result<CustomOutput,
     //     }
     // }
 
+    info!("get client");
     let mut client = get_client_pool().get().await.unwrap();
 
+
+    info!("start query");
     let stmt = client.prepare("SELECT article_title FROM article").await.unwrap();
 
     let result = client.query_one(&stmt, &[]).await.unwrap();
