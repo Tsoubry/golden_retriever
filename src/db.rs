@@ -1,11 +1,12 @@
-use log::info;
-
-use tokio_postgres::{NoTls, Row};
+use tokio_postgres::{NoTls};
 use dotenv::dotenv;
 use deadpool_postgres::Pool;
 
-use crate::models::Article;
+use crate::models::{Article, ArticleId};
 use tokio_postgres::error::Error;
+use tokio_pg_mapper::FromTokioPostgresRow;
+
+use std::collections::HashSet;
 
 mod config {
     pub use ::config::ConfigError;
@@ -52,4 +53,18 @@ pub async fn add_article(pool: &Pool, article: Article) -> Result<u64, Error>{
 
 }
 
+pub async fn get_recent_articles(pool: &Pool) -> HashSet<String>{
+    let client = pool.get().await.unwrap();
+    let stmt = client.prepare("SELECT article_id FROM article \
+    ORDER BY updated DESC LIMIT 300").await.unwrap();
+
+    let rows = client.query(&stmt, &[]).await.unwrap();
+
+    rows
+        .into_iter()
+        .map(|row| ArticleId::from_row(row).unwrap())
+        .map(|id| id.article_id)
+        .collect()
+
+}
 

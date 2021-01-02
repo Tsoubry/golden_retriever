@@ -1,1 +1,1 @@
-mod ninegag;
+pub mod tijd;

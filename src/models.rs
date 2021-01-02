@@ -12,3 +12,16 @@ pub struct Article {
     pub article_url: Option<String>,
     pub updated: std::time::SystemTime,
 }
+
+#[derive(PostgresMapper)]
+#[pg_mapper(table = "article")]
+pub struct ArticleId {
+    pub article_id: String,
+}
+
+pub struct ArticleInfo {
+    pub article_id: String,
+    pub article_title: String,
+    pub image_url: Option<String>,
+    pub article_url: Option<String>,
+}

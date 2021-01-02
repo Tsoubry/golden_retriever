@@ -19,7 +19,7 @@ use tokio_compat_02::FutureExt;
 #[tokio::main]
 async fn main() -> Result<(), Error> {
     SimpleLogger::new()
-        .with_level(LevelFilter::Debug)
+        .with_level(LevelFilter::Info)
         .init()
         .unwrap();
 

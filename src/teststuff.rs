@@ -1,32 +1,39 @@
+mod retrieve;
 mod db;
 mod models;
-
+mod services;
 use tokio_postgres::{Error};
 
-use log::{LevelFilter};
+
+use log::{LevelFilter, info};
 use simple_logger::SimpleLogger;
 
-use db::get_client_pool;
-use log::info;
+use retrieve::get_html;
+use db::{get_recent_articles, get_client_pool};
+
 use tokio_compat_02::FutureExt;
 
+use services::tijd::{insert_all_articles, TIJD_URL, TIJD_PLATFORM, TIJD_SECTION};
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
     SimpleLogger::new()
-        .with_level(LevelFilter::Debug)
+        .with_level(LevelFilter::Info)
         .init()
         .unwrap();
 
+    let pool = get_client_pool();
 
-    let mut client = get_client_pool().get().compat().await.unwrap();
+    let recent_articles = get_recent_articles(&pool).compat().await;
 
-    let stmt = client.prepare("SELECT article_title FROM article").compat().await.unwrap();
-
-    let result = client.query_one(&stmt, &[]).compat().await.unwrap();
-    let title: String = result.get(0);
-
-    info!("Article title is: {}", &title);
+    insert_all_articles(
+        recent_articles,
+        pool,
+        TIJD_PLATFORM.to_string(),
+        TIJD_SECTION.to_string()
+    )
+    .compat()
+    .await;
 
     Ok(())
 }
