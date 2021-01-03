@@ -53,12 +53,14 @@ pub async fn add_article(pool: &Pool, article: Article) -> Result<u64, Error>{
 
 }
 
-pub async fn get_recent_articles(pool: &Pool) -> HashSet<String>{
+pub async fn get_recent_articles(pool: &Pool, platform: &str, section: &str) -> HashSet<String>{
     let client = pool.get().await.unwrap();
-    let stmt = client.prepare("SELECT article_id FROM article \
-    ORDER BY updated DESC LIMIT 300").await.unwrap();
+    let stmt = client.prepare(
+        r#"SELECT article_id FROM article
+        WHERE platform = $1 AND section = $2
+        ORDER BY updated DESC LIMIT 300"#).await.unwrap();
 
-    let rows = client.query(&stmt, &[]).await.unwrap();
+    let rows = client.query(&stmt, &[&platform, &section]).await.unwrap();
 
     rows
         .into_iter()

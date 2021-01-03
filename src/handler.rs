@@ -3,12 +3,13 @@ use serde::{Deserialize, Serialize};
 use simple_error::bail;
 use log::{error, info};
 use crate::error::Error;
+use futures::executor::block_on;
 
 use crate::db::{get_recent_articles, get_client_pool};
 
 use tokio_compat_02::FutureExt;
 
-use crate::services::tijd::{insert_all_articles, TIJD_URL, TIJD_PLATFORM, TIJD_SECTION};
+use crate::services::tijd::{insert_all_articles, TIJD_PLATFORM, TIJD_SECTION};
 
 #[derive(Deserialize)]
 pub struct CustomEvent {
@@ -37,14 +38,23 @@ pub async fn default_handler(e: CustomEvent, c: Context) -> Result<CustomOutput,
 
     let pool = get_client_pool();
 
-    let recent_articles = get_recent_articles(&pool).compat().await;
+    match (e.target_service.as_ref(), e.section.as_ref()) {
+        (TIJD_PLATFORM, TIJD_SECTION) => {
+            let recent_articles = get_recent_articles(&pool, TIJD_PLATFORM, TIJD_SECTION)
+                .compat().await;
 
-    insert_all_articles(
-        recent_articles,
-        pool,
-        TIJD_PLATFORM.to_string(),
-        TIJD_SECTION.to_string()
-    ).compat().await;
+            info!("recent_articles: {}", recent_articles.len());
+
+            block_on(
+            insert_all_articles(
+                recent_articles,
+                pool,
+                TIJD_PLATFORM.to_string(),
+                TIJD_SECTION.to_string()
+            ).compat());
+        },
+        _ => ()
+    }
 
     Ok(CustomOutput {
         message: format!("process finished")

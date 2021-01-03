@@ -1,4 +1,4 @@
-use scraper::{Selector, Html, ElementRef};
+use scraper::{Selector, ElementRef};
 use regex::Regex;
 
 use std::collections::hash_map::DefaultHasher;
@@ -27,6 +27,8 @@ pub async fn insert_all_articles(existing_articles: HashSet<String>, pool: Pool,
     let headline_title_selector = Selector::parse("div.c-toparticle__title").unwrap();
     let url_selector = Selector::parse("a").unwrap();
     let image_selector = Selector::parse("img").unwrap();
+
+    info!("fragment: {:?}", &fragment);
 
     let top_article = fragment.select(&headline_selector).next();
 
