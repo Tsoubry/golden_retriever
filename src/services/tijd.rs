@@ -28,8 +28,6 @@ pub async fn insert_all_articles(existing_articles: HashSet<String>, pool: Pool,
     let url_selector = Selector::parse("a").unwrap();
     let image_selector = Selector::parse("img").unwrap();
 
-    info!("fragment: {:?}", &fragment);
-
     let top_article = fragment.select(&headline_selector).next();
 
     match top_article {
@@ -59,13 +57,17 @@ async fn get_article_info<'a>(title_selector: &Selector, url_selector: &Selector
     let title = element
         .select(title_selector)
         .next()
-        .map_or("".to_string(), |m| m.text().collect::<String>());
+        .map_or("".to_string(), |m| m.text().collect::<String>())
+        .replace("\n", "")
+        .trim()
+        .to_string()
+        ;
 
     let article_data = element.select(url_selector).next().unwrap();
 
     let url = article_data.value().attr("href").unwrap_or("");
-    let prefix = if url.contains(TIJD_URL) { "" } else { TIJD_URL };
-    let article_url = format!("{}{}", prefix, url);
+    let prefix = if url.contains(TIJD_URL) | url.contains("https://multimedia.tijd.be") { "" } else { TIJD_URL };
+    let article_url = format!("{}{}", prefix, url.trim());
 
     let mut hasher = DefaultHasher::new();
     hasher.write(&title.as_bytes());
@@ -87,7 +89,7 @@ async fn get_article_info<'a>(title_selector: &Selector, url_selector: &Selector
             let text_split = image_blob.split(",");
             let replaced = text_split.last().unwrap_or("").replace("&amp;", "&");
             let pattern_cleanup = Regex::new(r"\s\d+w$").unwrap();
-            Some(pattern_cleanup.replace(&replaced, "").into_owned())
+            Some(pattern_cleanup.replace(&replaced, "").trim().to_string())
         },
         None => None,
     };
