@@ -38,7 +38,7 @@ pub async fn insert_all_articles(existing_articles: HashSet<String>, pool: Pool,
 
             if !(existing_articles.contains(&headline_article.article_id)) {
                 log_article(&headline_article).await;
-                add_article(&pool, article_creator(headline_article, &platform, &section).await).await.unwrap();
+                add_article(&pool, article_creator(headline_article, &platform, &section).await).await.unwrap_or(0);
             }
         }
         _ => {}
@@ -48,7 +48,7 @@ pub async fn insert_all_articles(existing_articles: HashSet<String>, pool: Pool,
         let article_info = get_article_info(&title_selector, &url_selector, &image_selector, &element).await;
         if !(existing_articles.contains(&article_info.article_id)) {
             log_article(&article_info).await;
-            add_article(&pool, article_creator(article_info, &platform, &section).await).await.unwrap();
+            add_article(&pool, article_creator(article_info, &platform, &section).await).await.unwrap_or(0);
         }
     };
 }
